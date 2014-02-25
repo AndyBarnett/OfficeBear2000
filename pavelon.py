@@ -136,7 +136,7 @@ def use(prompt):
                 return
             
             for room_object in room_items:
-                if room_object in prompt and prompt !="use exit":
+                if room_object in prompt and prompt !="use exit" and prompt!="use powerman":
                     print "You aren't carrying that"
                     return
                 elif "exit" in prompt and powerman_subdued==False and position=="exit":
@@ -148,6 +148,9 @@ def use(prompt):
                     exit(0)
         print "Use what? That item isn't even in this game, you must be drunk you silly bear"
 
+    elif prompt=="use powerman":
+        print "The powerman can not be used.  Only the powerman can use another.  Powerman uses you as an involuntary martial arts opponent.  You are entirely destroyed"
+        dead("A swift fisting")
     else:
         print "you don't have anything in your Ewockets"
     
