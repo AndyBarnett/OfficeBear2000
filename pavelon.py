@@ -6,7 +6,7 @@ import pygame
 soundFile='musicwav.wav'
 pygame.init()
 pygame.mixer.music.load(soundFile)
-pygame.mixer.music.play(0)
+pygame.mixer.music.play()
 
 backgroundimage="paploo.jpg"
 background = pygame.image.load(backgroundimage)
@@ -179,44 +179,44 @@ def take(prompt):
     global hunger
     global position
     if len(room_items)!=0:
-            for room_object in room_items:
-                if room_object in room_items and position==room_object and room_object in prompt:
-                    print "You attempt to pick up %s" %room_object
-                    if room_object=="diary":
-                        print "Diary successfully picked up."
-                        inventory.append(room_object)
-                        room_items.remove(room_object)
-                        return
-                    elif room_object=="powerman":
-                        print "You wrap your arms around Powerman. He smiles as he silently kills you."
-                        dead("you were crushed by the mighty Powerman.")
-                    elif room_object=="desk":
-                        print "You lift the desk off the floor and drop it again, and everyone stares at you. You can't drag the desk around, it is your sacred shrine of pizza."
-                        hunger_down()
-                        return
-                    elif room_object=="exit":
-                        print "Try 'use exit'"
-                        return
-                elif room_object in room_items and position!=room_object and room_object in prompt and "pizza" not in prompt:
-                    print "Your little ewok arms can't reach that! You're still at "+position+". Waddle over to it"
+        for room_object in room_items:
+            if room_object in room_items and position==room_object and room_object in prompt:
+                print "You attempt to pick up %s" %room_object
+                if room_object=="diary":
+                    print "Diary successfully picked up."
+                    inventory.append(room_object)
+                    room_items.remove(room_object)
                     return
-            
-            if "pizza" in room_items and position=="desk" and "pizza" in prompt:
-                    if "pizza" not in inventory and hunger !=max_hunger:
-                        print "Pizza successfully picked up."
-                        inventory.append("pizza")
-                        return
-                    elif "pizza" not in inventory and hunger==max_hunger:
-                        print "Smart bear, taking one for the road!"
-                        inventory.append("pizza")
-                        return
-                    elif "pizza" in inventory:
-                        print "You can only take once slice at a time with you on your adventure!"
-                        return
-            elif "pizza" in room_items and position!="desk" and "pizza" in prompt:
-                print "Your little ewok arms can't reach pizza! You're still at "+position+". Waddle over to your desk."
+                elif room_object=="powerman":
+                    print "You wrap your arms around Powerman. He smiles as he silently kills you."
+                    dead("you were crushed by the mighty Powerman.")
+                elif room_object=="desk":
+                    print "You lift the desk off the floor and drop it again, and everyone stares at you. You can't drag the desk around, it is your sacred shrine of pizza."
+                    hunger_down()
+                    return
+                elif room_object=="exit":
+                    print "Try 'use exit'"
+                    return
+            elif room_object in room_items and position!=room_object and room_object in prompt and "pizza" not in prompt:
+                print "Your little ewok arms can't reach that! You're still at "+position+". Waddle over to it"
                 return
-            print "Take what? That item isn't even in this game, you must be drunk you silly bear"
+        
+        if "pizza" in room_items and position=="desk" and "pizza" in prompt:
+                if "pizza" not in inventory and hunger !=max_hunger:
+                    print "Pizza successfully picked up."
+                    inventory.append("pizza")
+                    return
+                elif "pizza" not in inventory and hunger==max_hunger:
+                    print "Smart bear, taking one for the road!"
+                    inventory.append("pizza")
+                    return
+                elif "pizza" in inventory:
+                    print "You can only take once slice at a time with you on your adventure!"
+                    return
+        elif "pizza" in room_items and position!="desk" and "pizza" in prompt:
+            print "Your little ewok arms can't reach pizza! You're still at "+position+". Waddle over to your desk."
+            return
+        print "Take what? That item isn't even in this game, you must be drunk you silly bear"
     else:
         print "There are no objects left in the room you crazy bastard"
 
@@ -270,14 +270,14 @@ def attack(prompt):
 
     for inventory_item in inventory:
         if inventory_item in prompt:
-                inventory.remove(inventory_item)
-                print "You attack the %s." %inventory_item
-                if inventory_item=="diary":
-                    print "You rip it to shreds with your bear claws and its usefulness remains the same"
-                    return
-                elif inventory_item=="pizza":
-                    print "You truly have lost your mind. You realise what you've done and take your own life"
-                    dead("you're a pizza traitor")
+            inventory.remove(inventory_item)
+            print "You attack the %s." %inventory_item
+            if inventory_item=="diary":
+                print "You rip it to shreds with your bear claws and its usefulness remains the same"
+                return
+            elif inventory_item=="pizza":
+                print "You truly have lost your mind. You realise what you've done and take your own life"
+                dead("you're a pizza traitor")
     hunger_down()
 
 def dead(why):
