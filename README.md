@@ -1,7 +1,7 @@
 Pavelon
 =======
 
-Setup
+Setup:
 Install 'pygame' with the installer included in this repo (if you're on 64-bit Windows) or from here if you're on something else: http://www.pygame.org/download.shtml
 
 To run:
