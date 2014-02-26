@@ -1,5 +1,24 @@
 from sys import exit
 
+#--------------All the music and image stuff--------------
+import pygame
+
+soundFile='musicwav.wav'
+pygame.init()
+pygame.mixer.music.load(soundFile)
+pygame.mixer.music.play(0)
+
+backgroundimage="paploo.jpg"
+background = pygame.image.load(backgroundimage)
+backgroundRect = background.get_rect()
+size = (width, height) = background.get_size()
+screen = pygame.display.set_mode(size)
+img=pygame.image.load(backgroundimage) 
+screen.blit(img,(0,0))
+pygame.display.flip()
+
+#--------------All the music and image stuff--------------
+
 room="office"
 hunger=0
 max_hunger=0
@@ -8,6 +27,7 @@ room_items=["desk", "exit", "powerman", "pizza", "diary"]
 in_room=True
 position="desk"
 powerman_subdued=False
+
 
 print "Welcome to Pavelon, the Pavel-based text adventure game \n"
 def instructions():
@@ -157,6 +177,7 @@ def use(prompt):
 
 def take(prompt):
     global hunger
+    global position
     if len(room_items)!=0:
             for room_object in room_items:
                 if room_object in room_items and position==room_object and room_object in prompt:
@@ -177,7 +198,6 @@ def take(prompt):
                         print "Try 'use exit'"
                         return
                 elif room_object in room_items and position!=room_object and room_object in prompt and "pizza" not in prompt:
-                    global position
                     print "Your little ewok arms can't reach that! You're still at "+position+". Waddle over to it"
                     return
             
@@ -261,7 +281,7 @@ def attack(prompt):
     hunger_down()
 
 def dead(why):
-    print "You're dead because "+why
+    print "You're dead because "+why+". He was a boisterous, sometimes foolhardy, Ewok"
     prompt="foobear"
     while prompt != "y" and prompt != "n":
         prompt = raw_input("Try again? (y/n) >")
