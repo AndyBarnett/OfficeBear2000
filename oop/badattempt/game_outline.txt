@@ -1,0 +1,48 @@
+Map?
+	next room
+	opening room
+Room
+	-Enter
+	-Exits
+		Office
+		Kitchen
+		Corridor		
+	Area
+		Enter
+		Exit
+			Your Desk
+			Powerman Desk
+			Exit to Corridor
+			Exit to Kitchen
+			
+			Table of cake
+			Coffee Machine
+			Ping Pong Table
+			
+			Exit to Street
+Item
+	Use
+	Pick Up
+		Pizza
+		
+		Diary
+		Laptop
+		
+		Cake
+		Ping Pong Bat
+	
+Character
+	Attack
+	Talk
+	-Health
+		Power Bear
+		Barney Bear
+		Francis Bear
+		Ball Bear
+Player
+	-Move
+	-Die
+	-Health
+	-Inventory
+Engine
+	-play
