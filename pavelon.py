@@ -1,7 +1,72 @@
-from sys import exit
+import sys
+from sys import exit, argv
+import pygame
+from ConfigParser import SafeConfigParser
+
+#--------------All the stuff to do with reading rooms, items, characters from the config.ini file and storing them as dictionary items--------------
+
+script, config = argv
+
+if len(sys.argv) != 2:
+            sys.exit("Incorrect number of arguments")
+
+content = open(sys.argv[1], 'r')
+
+#print content.read()
+
+def readcFile(fileName):
+    
+    cFile={}
+          
+    parser = SafeConfigParser()
+    parser.read(fileName)
+    
+    #put this in a loop eventually
+    
+    #rooms
+    cFile['roomA'] = parser.get('rooms', 'roomA')
+    cFile['roomB'] = parser.get('rooms', 'roomB')
+    
+    #roomA items
+    cFile['itemA1'] = parser.get('itemsA', 'item1')
+    cFile['itemA2'] = parser.get('itemsA', 'item2')
+    cFile['itemA3'] = parser.get('itemsA', 'item3')
+    cFile['itemA4'] = parser.get('itemsA', 'item4')
+    
+    #roomB items
+    cFile['itemB1'] = parser.get('itemsB', 'item1')
+    cFile['itemB2'] = parser.get('itemsB', 'item2')
+    cFile['itemB3'] = parser.get('itemsB', 'item3')
+    cFile['itemB4'] = parser.get('itemsB', 'item4')
+    
+    #roomA characters
+    cFile['characterA1'] = parser.get('charactersA', 'char1')
+    cFile['characterA2'] = parser.get('charactersA', 'char2')
+    cFile['characterA3'] = parser.get('charactersA', 'char3')
+    cFile['characterA4'] = parser.get('charactersA', 'char4')
+    cFile['characterA5'] = parser.get('charactersA', 'char5')
+    
+    #roomB characters
+    
+    #roomA character greetings
+    cFile['character_greetingsA1'] = parser.get('character_greetingsA', 'char1')
+    cFile['character_greetingsA2'] = parser.get('character_greetingsA', 'char2')
+    cFile['character_greetingsA3'] = parser.get('character_greetingsA', 'char3')
+    cFile['character_greetingsA4'] = parser.get('character_greetingsA', 'char4')
+    cFile['character_greetingsA5'] = parser.get('character_greetingsA', 'char5')
+    
+    #roomA character angrys
+    cFile['character_angryA1'] = parser.get('character_angrysA', 'char1')
+    cFile['character_angryA2'] = parser.get('character_angrysA', 'char2')
+    cFile['character_angryA3'] = parser.get('character_angrysA', 'char3')
+    cFile['character_angryA4'] = parser.get('character_angrysA', 'char4')
+    
+    return dict(cFile)
+
+print readcFile(sys.argv[1])
+#--------------All the stuff to do with reading rooms, items, characters from the config.ini file and storing them as dictionary items--------------
 
 #--------------All the music and image stuff--------------
-import pygame
 
 soundFile='musicwav.wav'
 pygame.init()
