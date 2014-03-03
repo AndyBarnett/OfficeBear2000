@@ -14,6 +14,12 @@ class Room(object):
 	def add_item(self, id, item):
 		self.contents[id] = item
 		
+	def get_item(self, id):
+		try:
+			return self.contents[id]
+		except:
+			return False
+	
 	def describe(self):
 		return_string = "%s\n" % self.description
 		
@@ -28,7 +34,15 @@ class Item(object):
 	def __init__(self, name, description):
 		self.name = name
 		self.descripton = description
+		self.custom_properties = {}
 		
+	def add_custom_prop(self, property, value):
+		self.custom_properties[property] = value;
+	def get_custom_prop(self, property):
+		try:
+			return self.custom_properties[property]
+		except:
+			return False
 		
 class Player(object):
 	def __init__(self, name):
@@ -39,7 +53,9 @@ class Map(object):
 	def __init__(self, start_room):
 		self.rooms = {}
 		self.rooms['office'] = Room("Office", "It is a place of despair.  A broken flourescent tube flickers above.  A rodent chews an asian candy on a nearby desk.")
-		self.rooms['office'].add_item('diary', Item("Your Diary", "A black leatherbound book"))
+		self.rooms['office'].add_item('your_diary', Item("Your Diary", "A black leatherbound book"))
+		self.rooms['office'].contents.get('your_diary').add_custom_prop('text_content', "My Schedule:\nFuck All")
+		
 		self.start_room = self.rooms[start_room]
 
 class Engine(object):
@@ -70,7 +86,17 @@ class Engine(object):
 				if action['action'] == 'waddleto' or action['action'] == 'wt':
 					print "Walking"
 				elif action['action'] == 'read' or action['action'] == 'r':
-					print "Reading"
+					item = self.current_room.get_item(action['action_subject'])
+					if item:
+						text = item.get_custom_prop('text_content')
+						if text:
+							print "It says:\n-----\n%s\n-----" % text
+						else:
+							print "There is nothing to read."
+					else:
+						print "There is no object called %s that you can read" % action['action_subject']
+					
+					
 				elif action['action'] == 'quit':
 					room_changed = True
 					self.playing = False
@@ -90,6 +116,7 @@ def action_interpreter(user_input):
 	
 	#join the other bits back together
 	user_input = ' '.join(user_input_list)
+	
 	#remove nasty characters
 	user_input = user_input.replace("'", "")
 	
