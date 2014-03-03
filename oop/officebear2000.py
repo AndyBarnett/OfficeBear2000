@@ -2,7 +2,7 @@
 
 CONFIG = {'intro' : "You are Office Bear, a cuddly little developer working for a tech company in the forest.",
 			'seperator' : "-------------------------",
-			'instructions' : "You can: waddleto/wt somewhere, use/u something, read/r something, talkto/t something, pickup/p something, quit & instructions"
+			'instructions' : "You can: waddleto/wt somewhere, lookat/l something, use/u something, read/r something, talkto/t something, pickup/p something, quit & instructions"
 			}
 
 class Room(object):
@@ -33,8 +33,13 @@ class Room(object):
 class Item(object):
 	def __init__(self, name, description):
 		self.name = name
-		self.descripton = description
+		self.description = description
+		self.contents = {}
+		self.container_type = 'internal'
 		self.custom_properties = {}
+		
+	def add_item(self, id, item):
+		self.contents[id] = item
 		
 	def add_custom_prop(self, property, value):
 		self.custom_properties[property] = value;
@@ -43,6 +48,21 @@ class Item(object):
 			return self.custom_properties[property]
 		except:
 			return False
+	
+	def describe(self):
+		return_string = "%s" % self.description
+		
+		if self.container_type == 'surface':
+			adjunct = "On"
+		else:
+			adjunct = "In"
+		
+		if len(self.contents) > 0:
+			return_string += "\n%s it there is:" % adjunct
+			for ident, item in self.contents.iteritems():
+				return_string += "\n - %s" % item.name
+			
+		return return_string
 		
 class Player(object):
 	def __init__(self, name):
@@ -53,8 +73,10 @@ class Map(object):
 	def __init__(self, start_room):
 		self.rooms = {}
 		self.rooms['office'] = Room("Office", "It is a place of despair.  A broken flourescent tube flickers above.  A rodent chews an asian candy on a nearby desk.")
-		self.rooms['office'].add_item('your_diary', Item("Your Diary", "A black leatherbound book"))
-		self.rooms['office'].contents.get('your_diary').add_custom_prop('text_content', "My Schedule:\nFuck All")
+		self.rooms['office'].add_item('your_desk', Item("Your Desk", "It is tired and wooden, and covered in general detritus."))
+		self.rooms['office'].contents.get('your_desk').add_item('your_diary', Item("Your Diary", "A black leatherbound book"))
+		self.rooms['office'].contents.get('your_desk').container_type = 'surface'
+		self.rooms['office'].contents.get('your_desk').contents.get('your_diary').add_custom_prop('text_content', "My Schedule:\nFuck All")
 		
 		self.start_room = self.rooms[start_room]
 
@@ -77,6 +99,7 @@ class Engine(object):
 			print self.current_room.describe()
 			
 			room_changed = False
+			
 			while room_changed == False:
 				print self.seperator
 				print "What do you want to do? (%s%%) >" % player.health,
@@ -85,6 +108,14 @@ class Engine(object):
 				
 				if action['action'] == 'waddleto' or action['action'] == 'wt':
 					print "Walking"
+					
+				elif action['action'] == 'lookat' or action['action'] == 'l':
+					item = self.current_room.get_item(action['action_subject'])
+					if item:
+						print item.describe()
+					else:
+						print "There is no item called that to look at."
+				
 				elif action['action'] == 'read' or action['action'] == 'r':
 					item = self.current_room.get_item(action['action_subject'])
 					if item:
@@ -94,7 +125,7 @@ class Engine(object):
 						else:
 							print "There is nothing to read."
 					else:
-						print "There is no object called %s that you can read" % action['action_subject']
+						print "There is no object called that you can read."
 					
 					
 				elif action['action'] == 'quit':
