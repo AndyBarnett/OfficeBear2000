@@ -1,8 +1,8 @@
 #officebear2000
 
 CONFIG = {'intro' : "You are Office Bear, a cuddly little developer working for a tech company in the forest.",
-			'seperator' : "-------------------------",
-			'instructions' : "You can: waddleto/wt somewhere, lookat/l something, use/u something, read/r something, talkto/t something, pickup/p something, quit & instructions"
+			'seperator' : "--------------------------------------------------",
+			'instructions' : "You can: waddleto/wt somewhere, lookat/l something, use/u something, read/r something, talkto/t something, pickup/p something, quit or instructions"
 			}
 
 class Room(object):
@@ -13,12 +13,39 @@ class Room(object):
 		
 	def add_item(self, id, item):
 		self.contents[id] = item
-		
-	def get_item(self, id):
+	
+	def remove_item(self, id):
+		success = False
 		try:
-			return self.contents[id]
+			del self.contents[id]
+			success = True
 		except:
-			return False
+			success = False
+			
+		#if we can't delete the item, try deleting items in items.
+		if success == False:
+			for ident, item in self.contents.iteritems():
+				if success == False:
+					success = item.remove_item(id)
+		
+		return success
+		
+	
+	def get_item(self, id):
+	
+		return_item = False
+	
+		try:
+			return_item = self.contents[id]
+		except:
+			return_item = False
+		
+		#if the item isn't directly available in the room, look in it's items.
+		if return_item == False:
+			for ident, item in self.contents.iteritems():
+				return_item = item.get_item(id)
+				
+		return return_item
 	
 	def describe(self):
 		return_string = "%s\n" % self.description
@@ -36,10 +63,34 @@ class Item(object):
 		self.description = description
 		self.contents = {}
 		self.container_type = 'internal'
+		self.locked = False
+		self.grabbable = False
 		self.custom_properties = {}
 		
 	def add_item(self, id, item):
 		self.contents[id] = item
+	
+	def remove_item(self, id):
+		try:
+			del self.contents[id]
+			return True
+		except:
+			print "Cannot delete that item"
+			return False
+	
+	def get_item(self, id):
+		return_item = False
+		try:
+			return_item = self.contents[id]
+		except:
+			return_item = False
+			
+		if return_item != False and self.locked == False:
+			return return_item
+		else:
+			return False
+			
+
 		
 	def add_custom_prop(self, property, value):
 		self.custom_properties[property] = value;
@@ -61,13 +112,38 @@ class Item(object):
 			return_string += "\n%s it there is:" % adjunct
 			for ident, item in self.contents.iteritems():
 				return_string += "\n - %s" % item.name
-			
+		
 		return return_string
+
 		
 class Player(object):
 	def __init__(self, name):
 		self.name = name
 		self.health = 100
+		self.inventory = {}
+		
+	def add_to_inventory(self, ident, item):
+		self.inventory[ident] = item
+		print "%s is now in your pocket." % item.name
+		
+	def describe_inventory(self):
+		return_string = "You pockets contain:\n"
+		if len(self.inventory) > 0:
+			for ident, item in self.inventory.iteritems():
+				return_string += " - %s\n" % item.name
+		else:
+			return_string += "Bugger all."
+			
+		return return_string
+		
+	def get_inventory_item(self, id):
+		return_item = False
+		try:
+			return_item = self.inventory[id]
+		except:
+			return_item = False
+			
+		return return_item
 		
 class Map(object):
 	def __init__(self, start_room):
@@ -77,6 +153,7 @@ class Map(object):
 		self.rooms['office'].contents.get('your_desk').add_item('your_diary', Item("Your Diary", "A black leatherbound book"))
 		self.rooms['office'].contents.get('your_desk').container_type = 'surface'
 		self.rooms['office'].contents.get('your_desk').contents.get('your_diary').add_custom_prop('text_content', "My Schedule:\nFuck All")
+		self.rooms['office'].contents.get('your_desk').contents.get('your_diary').grabbable = True
 		
 		self.start_room = self.rooms[start_room]
 
@@ -86,6 +163,7 @@ class Engine(object):
 		self.current_room = map.start_room
 		self.player = Player("OfficeBear")
 		self.introduction = config['intro']
+		self.instructions = config['instructions']
 		self.seperator = config['seperator']
 		
 	def play(self):
@@ -102,8 +180,9 @@ class Engine(object):
 			
 			while room_changed == False:
 				print self.seperator
-				print "What do you want to do? (%s%%) >" % player.health,
+				print "What do you want to do? (%s%%) >" % self.player.health,
 				user_action = raw_input()
+				print self.seperator
 				action = action_interpreter(user_action)
 				
 				if action['action'] == 'waddleto' or action['action'] == 'wt':
@@ -111,6 +190,10 @@ class Engine(object):
 					
 				elif action['action'] == 'lookat' or action['action'] == 'l':
 					item = self.current_room.get_item(action['action_subject'])
+					
+					if item == False:
+						item = self.player.get_inventory_item(action['action_subject'])
+					
 					if item:
 						print item.describe()
 					else:
@@ -118,6 +201,10 @@ class Engine(object):
 				
 				elif action['action'] == 'read' or action['action'] == 'r':
 					item = self.current_room.get_item(action['action_subject'])
+					
+					if item == False:
+						item = self.player.get_inventory_item(action['action_subject'])
+						
 					if item:
 						text = item.get_custom_prop('text_content')
 						if text:
@@ -125,9 +212,24 @@ class Engine(object):
 						else:
 							print "There is nothing to read."
 					else:
-						print "There is no object called that you can read."
+						print "There is no object called that that you can read."
 					
-					
+				elif action['action'] == 'pickup' or action['action'] == 'p':
+					item = self.current_room.get_item(action['action_subject'])
+					if item and item.grabbable == True:
+						self.player.add_to_inventory(action['action_subject'], item)
+						del_success = self.current_room.remove_item(action['action_subject'])
+					elif item and item.grabbable == False:
+						print "You can't pick that up, that would be ridiculous!"
+					else:
+						print "There is no item called that to pick up!"
+				
+				elif action['action'] == 'inventory' or action['action'] == 'i':
+					print self.player.describe_inventory()
+				
+				elif action['action'] == 'instructions':
+					print self.instructions
+				
 				elif action['action'] == 'quit':
 					room_changed = True
 					self.playing = False
@@ -160,8 +262,7 @@ def action_interpreter(user_input):
 	return action_obj
 
 print "Starting..."
-room_map = Map('office')
-player = Player("Office Bear")			
+room_map = Map('office')		
 game = Engine(room_map, CONFIG)
 game.play()
 
